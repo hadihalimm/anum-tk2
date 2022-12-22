@@ -13,7 +13,7 @@ tujuan dari kode tersebut.
 % %-----------------------------------------------------------------------------%
 Dalam menulis kode, penulis sepenuhnya menggunakan rumus-rumus yang telah dijabarkan pada
 \bab~\ref{bab:2}. Pada awal perhitungan, perlu dicari $\delta_i$ dan $\Delta_i$
-sesuai dengan yang dijabarkan pada \equ~(TODO) dan \equ~(TODO). Agar menghindari
+sesuai dengan yang dijabarkan pada \equ~(\ref{eq:2.5}) dan \equ~(\ref{eq:2.6}). Agar menghindari
 ambiguitas, $\delta_i$ akan ditulis sebagai \code{h} pada implementasi.
 
 Karena kedua rumus yang dijabarkan penuh dengan deret, maka tim penulis
@@ -30,7 +30,7 @@ Teknik yang sama juga digunakan untuk menghitung $\Delta_i$.
 ]{assets/codes/h_i.m}
 
 Setelah $\delta_i$ dan $\Delta_i$ berhasil didapatkan, selanjutnya tim penulis
-menerapkan \equ~(TODO) penggunakan operator \code{./} (pembagian setiap elemen)
+menerapkan \equ~(\ref{eq:2.9}) penggunakan operator \code{./} (pembagian setiap elemen)
 untuk membagi setiap elemen $\Delta_i$ dengan $\delta_i$. Hasil dari pembagian
 setiap elemen $\Delta_i$ dengan $\delta_i$ akan disimpan pada variabel \code{t},
 seperti pada \lst~\ref{code:t_i}. Hasil yang disimpan akan digunakan untuk
@@ -38,11 +38,11 @@ membangun $b$ sistem persamaan linier $A x = b$.
 
 \lstinputlisting[
 	language=Octave,
-	caption=Sampel kode untuk menghitung \equ~(TODO) secara numerik,
+	caption=Sampel kode untuk menghitung \equ~(\ref{eq:2.9}) secara numerik,
 	label=code:t_i
 ]{assets/codes/findT.m}
 
-Berdasarkan \equ~(TODO), kita dapat menggunakan teknik yang sama pada
+Berdasarkan sisi kanan \equ~(\ref{eq:2.10}), kita dapat menggunakan teknik yang sama pada
 \lst~\ref{code:h_i} untuk menyederhanakan kode implementasi. Dari $n$ titik,
 diperoleh $n-2$ persamaan. Agar sistem persamaan linier tidak \f{underdetermined}
 dan sifat natural dari \f{Cubic Spline} terjaga, maka ujung atas dan bawah vektor
@@ -56,7 +56,7 @@ persamaan $A x = b$ dapat ditulis seperti \lst~\ref{code:baxb}.
 ]{assets/codes/buildB.m}
 
 Untuk menyusun bagian $A$ dari sistem persamaan $A x = b$, tim penulis perlu
-menyusun matriks tridiagonal seperti pada \equ~(TODO). Implementasi dapat
+menyusun matriks tridiagonal seperti pada sisi kiri \equ~(\ref{eq:2.10}). Implementasi dapat
 dilihat pada \lst~\ref{code:Aaxb}.
 
 \lstinputlisting[
@@ -69,7 +69,7 @@ Setelah mendapat bagian $A$ dan $b$ pada sistem linier tridiagonal $A x = b$,
 tim penulis menyelesaikan $x$ dengan fungsi eliminasi Gauss di Octave. Hasil
 penyelesaian $x$ merupakan koefisien $c$ pada fungsi interpolan $S_i$.
 Selanjutnya penulis mencari koefisien $b$ dan $d$ seperti yang dijabarkan
-pada \equ~(TODO).
+pada \equ~(\ref{eq:2.7}) dan \equ~(\ref{eq:2.8}).
 
 Karena seluruh koefisien sudah didapat, maka secara teknis kita dapat menyusun
 fungsi-fungsi interpolan $S_i$. Namun, sintaks Octave tidak memungkinkan untuk
