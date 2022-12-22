@@ -34,6 +34,71 @@ Mendefinisikan \f{spline} dari suatu himpunan titik-titik data merupakan kegiata
 	\item Properti 4e \bo{Not-a-knot cubic spline} :\[ S'''_{1}(x_2) = S'''_{2}(x_2) \text{  dan  } S'''_{n-2}(x_{n-1}) = S'''_{n-1}(x_{n-1}) \]
 \end{itemize}
 
+Dengan adanya properti \f{endpoints} di atas, jumlah persamaan yang perlu diselesaikan untuk menemukan solusi interpolasi yaitu sebanyak $3n-3$.
+Implikasi yang dihasilkan oleh properti-properti spline dengan jumlah persamaan yang ada adalah sebagai berikut:
+\begin{itemize}
+	\item Properti 1 mengimplikasikan \(n-1\) persamaan : \[ y_2 = S_{1}(x_2) = y_1 + b_1(x - x_1) + c_1(x - x_1)^2 + d_1(x - x_1)^3 \]  \vdots \begin{equation} \label{eq:2.1} y_n =  S_{n-1}(x_n) = y_{n-1} + b_{n-1}(x_n - x_{n-1}) + c_{n-1}(x_n - x_{n-1})^2 + d_{n-1}(x_n - x_{n-1})^3 \end{equation}
+	\item Properti 2 mengimplikasikan \(n-2\) persamaan : \[ 0 = S'_{1}(x_2) - S'_{2}(x_2) = b_1 + 2c_1(x_2 - x_1) + 3d_1(x_2 - x_1)^2 - b_2 \] \vdots \begin{equation} \label{eq:2.2}  0 = S'_{n-2}(x_{n-1}) - S'_{n-1}(x_{n-1}) = b_{n-2} + 2c_{n-2}(x_{n-1} - x_{n-2}) + 3d_{n-2}(x_{n-1} - x_{n-2})^2 - b_{n-1}  \end{equation}
+	\item Properti 3 mengimpliaksikan \(n-2\) persamaan : \[ 0 = S''_{1}(x_2) - S''{2}(x_2) = 2c_1 + 6d_1(x_2 - x_1) - 2c_2 \] \vdots \begin{equation} \label{eq:2.3}  0 = S''_{n-2}(x_{n-1}) - S''{n-1}(x_{n-1}) = 2c_{n-2} + 6d_{n-2}(x_{n-1} - x_{n-2}) - 2c_{n-1}  \end{equation}
+\end{itemize}
+
+Menyelesaikan persamaan-persamaan di atas dapat dilakukan dengan cara mengubahnya ke bentuk yang lebih simpel. Oleh karena itu, diperlukan beberapa notasi tambahan baru:
+\begin{equation} \label{eq:2.4}  c_n = S''_{n-1}(x_n) / 2  \end{equation}
+\begin{equation} \label{eq:2.5} \delta_{i} = x_{i+1} - x_i \end{equation}
+\begin{equation} \label{eq:2.6} \Delta_{i} = y_{i+1} - y_i \end{equation}
+
+Selesaikan persamaan \equ~(\ref{eq:2.3}):
+\begin{equation} \label{eq:2.7}
+	d_i = \frac{ c_{i+1} - c_i }{ 3\delta-{i} } \text{   for } i=1,2,...,n-1
+\end{equation}
+
+Selesaikan persamaan \equ~(\ref{eq:2.1}) dengan substitusi \equ~(\ref{eq:2.7})
+\begin{equation} \label{eq:2.8}
+	\begin{split}
+		b_i &=  \frac{\Delta_i}{\delta_i} - c_{i}d{i} - d_{i}\delta^2_{i} \\
+		&= \frac{\Delta_i}{\delta_i} - c_{i}d{i} - \frac{\delta_i}{3}(c_{i+1} - c_i) \\
+		&= \frac{\Delta_i}{\delta_i} - \frac{\delta_i}{3}(2c_i + c_{i+1}) \text{   for } i = 1,2...,n-1
+	\end{split}
+\end{equation}
+
+Selesaikan persamaan \equ~(\ref{eq:2.2}) dengan substitusi \equ~(\ref{eq:2.7}) dan \equ~(\ref{eq:2.7})
+\begin{equation} \label{eq:2.9}
+	\delta_{n-2}c_{n-2} + 2(\delta_{n-2} + \delta_{n-1})c_{n-1} + \delta_{n-1}c_n = 3(\frac{\Delta_{n-1}}{\delta_{n-1}} - \frac{\Delta_{n-2}}{\delta_{n-2}})
+\end{equation}
+
+Dan juga dua buah persamaan \f{endpoints} (untuk kasus ini menggunakan \f{natural spline}):
+$$ S''_{1}(x_1) = 0 \Rightarrow 2c_1 = 0 $$
+$$ S''_{n-1}(x_n) = 0 \Rightarrow 2c_n = 0 $$
+
+Dengan demikian, hal ini akan memberikan $n$ persamaan dalam $n$ buah nilai $c_i$ yang dapat dikonstruksi sebagai perkalian matriks:
+\begin{equation} \label{eq:2.10}
+	\begin{bmatrix}
+		1        & 0                     & 0                     &              &                               &             \\
+		\delta_1 & 2\delta_1 + 2\delta_2 & \delta_2              &              &                               &             \\
+		0        & \delta_2              & 2\delta_2 + 2\delta_3 & \delta_3     &                               &             \\
+		         & \ddots                & \ddots                & \ddots       & \ddots                        &             \\
+		         &                       &                       & \delta_{n-2} & 2\delta_{n-2} + 2\delta_{n-1} & \delta{n-1} \\
+		         &                       &                       & 0            & 0                             & 1           \\
+	\end{bmatrix}
+	\times
+	\begin{bmatrix}
+		c_1    \\
+		c_2    \\
+		\\
+		\vdots \\
+		\\
+		c_n    \\
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		0                                                                        \\
+		3(\frac{\Delta_2}{\delta_2} - \frac{\Delta_1}{\delta_1})                 \\
+		\\
+		\vdots                                                                   \\
+		3(\frac{\Delta_{n-1}}{\delta_{n-1}} - \frac{\Delta_{n-2}}{\delta_{n-2}}) \\
+		0                                                                        \\
+	\end{bmatrix}
+\end{equation}
 % %-----------------------------------------------------------------------------%
 % \section{Apa itu \latex?}
 % \label{sec:latex}
