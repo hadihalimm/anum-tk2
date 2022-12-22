@@ -56,11 +56,11 @@
 % Menghilangkan penomoran
 \pagenumbering{gobble}
 
-\strcompare{Laporan Kerja Praktik}{\type}{}
-{
-	\include{src/00-frontMatter/pernyataanOrisinalitas}
-	\forceclearchapter
-}
+% \strcompare{Laporan Kerja Praktik}{\type}{}
+% {
+% 	\include{src/00-frontMatter/pernyataanOrisinalitas}
+% 	\forceclearchapter
+% }
 
 % Memunculkan penomoran kembali
 \pagenumbering{roman}
@@ -70,52 +70,52 @@
 \setcounter{page}{2}
 
 %
-% Lembar Penegesahan
-\strcompare{Laporan Kerja Praktik}{\type}
-{
-	% Lembar Pengesahan Kerja Praktik dari LaTeX
-	\addChapter{LEMBAR PERSETUJUAN DOSEN KERJA PRAKTIK}
-	\include{src/00-frontMatter/pengesahanKP}
-	\forceclearchapter
-}
-{
-	\addChapter{LEMBAR PENGESAHAN}
-	% Gunakan salah satu (comment atau hapus kode yang tidak perlu):
-	% Lembar Pengesahan Tugas Akhir dari LaTeX
-	\strcompare{Doktor}{\jenjang}
-	{\include{src/00-frontMatter/pengesahanSidangS3}}
-	{\include{src/00-frontMatter/pengesahanSidang}}
-	\forceclearchapter
-	% Lembar Pengesahan dari PDF lain (misal: generated oleh SISIDANG [Fasilkom])
-	%\putpdf{assets/pdfs/pengesahanSidang.pdf}
-}
+% % Lembar Penegesahan
+% \strcompare{Laporan Kerja Praktik}{\type}
+% {
+% 	% Lembar Pengesahan Kerja Praktik dari LaTeX
+% 	\addChapter{LEMBAR PERSETUJUAN DOSEN KERJA PRAKTIK}
+% 	\include{src/00-frontMatter/pengesahanKP}
+% 	\forceclearchapter
+% }
+% {
+% 	\addChapter{LEMBAR PENGESAHAN}
+% 	% Gunakan salah satu (comment atau hapus kode yang tidak perlu):
+% 	% Lembar Pengesahan Tugas Akhir dari LaTeX
+% 	\strcompare{Doktor}{\jenjang}
+% 	{\include{src/00-frontMatter/pengesahanSidangS3}}
+% 	{\include{src/00-frontMatter/pengesahanSidang}}
+% 	\forceclearchapter
+% 	% Lembar Pengesahan dari PDF lain (misal: generated oleh SISIDANG [Fasilkom])
+% 	%\putpdf{assets/pdfs/pengesahanSidang.pdf}
+% }
 
 
-\strcompare{Laporan Kerja Praktik}{\type}{}
-{
-	%
-	% Kata Pengantar
-	\addChapter{\kataPengantar}
-	\include{src/00-frontMatter/kataPengantar}
-	\forceclearchapter
-	%
-	% Lembar Persetujuan Publikasi Ilmiah
-	\addChapter{LEMBAR PERSETUJUAN PUBLIKASI ILMIAH}
-	\include{src/00-frontMatter/persetujuanPublikasi}
-	\forceclearchapter
-}
+% \strcompare{Laporan Kerja Praktik}{\type}{}
+% {
+% 	%
+% 	% Kata Pengantar
+% 	\addChapter{\kataPengantar}
+% 	\include{src/00-frontMatter/kataPengantar}
+% 	\forceclearchapter
+% 	%
+% 	% Lembar Persetujuan Publikasi Ilmiah
+% 	\addChapter{LEMBAR PERSETUJUAN PUBLIKASI ILMIAH}
+% 	\include{src/00-frontMatter/persetujuanPublikasi}
+% 	\forceclearchapter
+% }
 
 %
 % Untuk halaman pertama setiap chapter mulai dari abstrak, tetap berikan mark universitas.
 %
 \pagestyle{first-pages}
 
-%
-\addChapter{ABSTRAK}
-\include{src/00-frontMatter/abstrak}
-%
-%
-\include{src/00-frontMatter/abstract}
+% %
+% \addChapter{ABSTRAK}
+% \include{src/00-frontMatter/abstrak}
+% %
+% %
+% \include{src/00-frontMatter/abstract}
 
 %
 % Daftar isi, gambar, tabel, dan kode
