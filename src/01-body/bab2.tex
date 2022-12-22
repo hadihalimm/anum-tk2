@@ -2,113 +2,42 @@
 \chapter{\babDua}
 \label{bab:2}
 %-----------------------------------------------------------------------------%
-Setelah berhasil menyusun rumus, tim penulis kemudian menulis implementasi kode menggunakan
-bahasa MatLab/Octave. Tim penulis menulis memisahkan kode menjadi dua bagian berdasarkan
-tujuan dari kode tersebut.
+Untuk memulai penelitian, dibutuhkan kerangka berpikir yang sesuai untuk permasalahan yang ingin dipecahkan. Untuk membentuk kerangka berpikir yang sesuai, perlu dikaitkan dengan hasil studi literatur yang telah dilakukan. Oleh karena itu, pada bab ini, akan dijelaskan hasil studi literatur yang telah dilakukan yang telah dikaitan dengan kerangka kerja untuk penelitian ini.
 
 
-% %-----------------------------------------------------------------------------%
-\section{Memecahkan \f{Natural Cubic Spline} secara Numerik}
-\label{sec:numericCubicSpline}
-% %-----------------------------------------------------------------------------%
-Dalam menulis kode, penulis sepenuhnya menggunakan rumus yang dijabarkan pada
-\bab~\ref{bab:1}. Pada awal perhitungan, perlu dicari $\delta_i$ dan $\Delta_i$
-sesuai dengan yang dijabarkan pada \equ~(TODO) dan \equ~(TODO). Agar menghindari
-ambiguitas, $\delta_i$ akan ditulis sebagai \code{h} pada implementasi.
+%-----------------------------------------------------------------------------%
+\section{Cubic Splines}
+\label{sec:cubicSplines}
+%-----------------------------------------------------------------------------%
+\f{Splines} merupakan salah satu pendekatan dalam permasalahan interpolasi. Berbeda dengan interpolasi polinomial yang hanya menggunakan satu fungsi polinomial untuk memenuhi semua \f{data points}, \f{Splines} menggunakan beberapa fungsi polinomial derajat rendah untuk melewati semua titik-titik pada data.
+Diketahui data sebanyak $n$ yang merupakan koordinat titik dengan format $(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)$ dengan syarat $x_i$ bersifat \f{distinct} dan terurut secara \f{ascending}. Sebuah \bo{Cubic Splines} $S(x)$ melewati titik $(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)$ merupakan sebuah himpunan/\f{set} dari polinomial pangkat tiga:
+\begin{center}
+	\[ S_{1}(x) = y_1 + b_1(x - x_1) + c_1(x - x_1)^2 + d_1(x - x_1)^3 \text{  pada interval  } [x_1, x_2] \]
+	\[ S_{2}(x) = y_1 + b_1(x - x_2) + c_1(x - x_2)^2 + d_1(x - x_2)^3 \text{  pada interval  } [x_1, x_2] \]
+	\vdots
+	\[ S_{n-1}(x) = y_{n-1} + b_{n-1}(x - x_{n-1}) + c_{n-1}(x - x_{n-1})^2 + d_{n-1}(x - x_{n-1})^3 \text{  pada interval  } [x_{n-1}, x_n]\]
+\end{center}
 
-Karena kedua rumus yang dijabarkan penuh dengan deret, maka tim penulis
-memanfaatkan sifat dari data struktur vektor dalam Octave untuk memudahkan
-implementasi. Tim penulis memanfaatkan struktur data tersebut dengan membangun
-\f{slice} dari vektor transpos menggunakan input $x$ dan $y$. \lst~\ref{code:h_i}
-merupakan contoh kode yang memanfaatkan sifat struktur data vektor di Octave.
-Teknik yang sama juga digunakan untuk menghitung $\Delta_i$.
+Sebuah \bo{Cubic Splines} $S(x)$ memiliki beberapa properti antara lain:
+\begin{itemize}
+	\item Properti 1: \[ S_{i}(x_i) = y_i  \text{  and  }  S_{i}(x{i}+1) = y_{i+1} \] Properti ini menjamin \(S(x)\) sukses menginterpolasi titik-titik yang diberikan.
+	\item Properti 2: \[ S'_{i-1}(x_i) = S'_{i}(x_1) \text{  for  } i=2,...,n-1 \] Properti ini mengakibatkan \f{slopes} dari dua bagian spline yang berbeda dapat bertemu pada suatu tempat.
+	\item Properti 3: \[ S''_{i-1}(x_i) = S''_{i}(x_1) \text{  for  } i=2,...,n-1 \] Properti ini menjamin \f{curvature} menjadi \f{smooth}
+\end{itemize}
 
-\lstinputlisting[
-	language=Octave,
-	caption=Sampel kode untuk menghitung $\delta_i$ secara numerik,
-	label=code:h_i
-]{assets/codes/h_i.m}
-
-Setelah $\delta_i$ dan $\Delta_i$ berhasil didapatkan, selanjutnya tim penulis
-menerapkan \equ~(TODO) penggunakan operator \code{./} (pembagian setiap elemen)
-untuk membagi setiap elemen $\Delta_i$ dengan $\delta_i$. Hasil dari pembagian
-setiap elemen $\Delta_i$ dengan $\delta_i$ akan disimpan pada variabel \code{t},
-seperti pada \lst~\ref{code:t_i}. Hasil yang disimpan akan digunakan untuk
-membangun $b$ sistem persamaan linier $A x = b$.
-
-\lstinputlisting[
-	language=Octave,
-	caption=Sampel kode untuk menghitung \equ~(TODO) secara numerik,
-	label=code:t_i
-]{assets/codes/findT.m}
-
-Berdasarkan \equ~(TODO), kita dapat menggunakan teknik yang sama pada
-\lst~\ref{code:h_i} untuk menyederhanakan kode implementasi. Dari $n$ titik,
-diperoleh $n-2$ persamaan. Agar sistem persamaan linier tidak \f{underdetermined}
-dan sifat natural dari \f{Cubic Spline} terjaga, maka ujung atas dan bawah vektor
-yang dihasilkan ditambahkan $0$. Sehingga implementasi bagian $b$ pada sistem
-persamaan $A x = b$ dapat ditulis seperti \lst~\ref{code:baxb}.
-
-\lstinputlisting[
-	language=Octave,
-	caption={Sampel kode untuk menyusun bagian $b$ dari $A x = b$},
-	label=code:baxb
-]{assets/codes/buildB.m}
-
-Untuk menyusun bagian $A$ dari sistem persamaan $A x = b$, tim penulis perlu
-menyusun matriks tridiagonal seperti pada \equ~(TODO). Implementasi dapat
-dilihat pada \lst~\ref{code:Aaxb}.
-
-\lstinputlisting[
-	language=Octave,
-	caption={Sampel kode untuk menyusun bagian $A$ dari $A x = b$},
-	label=code:Aaxb
-]{assets/codes/buildA.m}
-
-Setelah mendapat bagian $A$ dan $b$ pada sistem linier tridiagonal $A x = b$,
-tim penulis menyelesaikan $x$ dengan fungsi eliminasi Gauss di Octave. Hasil
-penyelesaian $x$ merupakan koefisien $c$ pada fungsi interpolan $S_i$.
-Selanjutnya penulis mencari koefisien $b$ dan $d$ seperti yang dijabarkan
-pada \equ~(TODO).
-
-Karena seluruh koefisien sudah didapat, maka secara teknis kita dapat menyusun
-fungsi-fungsi interpolan $S_i$. Namun, sintaks Octave tidak memungkinkan untuk
-sebuah fungsi menghasilkan lebih dari 1 fungsi. Limitasi ini membuat tim
-penulis untuk langsung mengevaluasi setiap titik pada $x_0$ sampai $x_{n-1}$.
-Pada \lst~\ref{code:eNatureCubic} dapat terlihat algoritma untuk menggunakan
-$S_i$ untuk mengevaluasi titik yang berada diantara $x_(i-1)$ dan $x_i$.
-
-\lstinputlisting[
-	language=Octave,
-	caption={Sampel kode untuk evaluasi \f{Natural Cubic Spline} pada titik-titik $x$},
-	label=code:eNatureCubic
-]{assets/codes/evaluateNaturalCubic.m}
-
-Keseluruhan kode akhir yang lengkap tersedia pada \apdx~\ref{appendix:naturalCubicSpline}.
+Mendefinisikan \f{spline} dari suatu himpunan titik-titik data merupakan kegiatan mencari koefisien dari $b_i, c_i, d_i$ yang menyebabkan properti 1,2, dan 3 terpenuhi. Terdapat beberapa properti tambahan yang digunakan agar hasil komputasi menjadi lebih simpel dan hasil yang diberikan lebih deskriptif. Properti ini disebut dengan \f{endpoints}. \f{Endpoints} yang digunakan dapat dipilih satu dari beberapa varian di bawah ini:
+\begin{itemize}
+	\item Properti 4a \bo{Natural spline} : \[ S''(x) = 0 \text{  dan  } S''_{n-1}(X_n) = 0\]
+	\item Properti 4b \bo{Curvature-adjusted cubic spline} : \[ S''_{1}(x_1) \text{  dan  }  S''{n-1}(x_n) \text{ assign ke sebuah nilai arbitrary}\]
+	\item Properti 4c \bo{Clamped cubic spline} : \[ S'_{1}(x_1) \text{  dan  } S'_{n-1}(x_n) \text{  assign ke sebuah nilai arbitrary}\]
+	\item Properti 4d \bo{Parabolically terminated cubic spline} : \[  S_{1} \text{ dan } S_{n-1} \text{ merupakan polinomial derajat kurang dari atau sama dengan 2}\]
+	\item Properti 4e \bo{Not-a-knot cubic spline} :\[ S'''_{1}(x_2) = S'''_{2}(x_2) \text{  dan  } S'''_{n-2}(x_{n-1}) = S'''_{n-1}(x_{n-1}) \]
+\end{itemize}
 
 % %-----------------------------------------------------------------------------%
-\section{\f{Cubic Spline} Parametrik}
-\label{sec:parametricSpline}
+% \section{Apa itu \latex?}
+% \label{sec:latex}
 % %-----------------------------------------------------------------------------%
-Pada \sect~\ref{sec:numericCubicSpline} telah dijelaskan bagaimana cara menyusun
-fungsi \f{natural cubic spline} secara numerik. Agar dapat menghasilkan
-\f{natural cubic spline} yang bersifat parametrik, tim penulis membungkus fungsi
-\f{natural cubic spline} yang didapat pada \sect~\ref{sec:numericCubicSpline} ke
-dalam fungsi bernama \f{parametric cubic spline}. Fungsi tersebut mengevaluasi
-sembarang titik terhadap titik $x$ dan $y$ secara terpisah.
-
-\lstinputlisting[
-	language=Octave,
-	caption={Sampel kode \f{natural cubic spline} secara parametrik.},
-	label=code:parametricCubic
-]{assets/codes/parametricSpline.m}
-
-Dapat terlihat pada \lst~\ref{code:parametricCubic} bahwa untuk setiap nilai $x$
-dan $y$ yang terpisah, keduanya akan mempunyai fungsi interpolan yang berbeda.
-Hasil dari interpolasi \f{cubic spline} secara parametrik akan disimpan pada
-variabel $p$ dan $q$. Kedua nilai tersebut dapat langsung diplot menggunakan
-fungsi bawaan Octave. Kode akhir dari \f{cubic spline} parametrik dapat dilihat
-pada \apdx~\ref{code:appendix:parametricCubic}.
 
 % %-----------------------------------------------------------------------------%
 % \subsection{\latex~Secara Singkat}
@@ -118,9 +47,9 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % \begin{tabular}{| p{13cm} |}
 % 	\hline
 % 	\\
-% 	LaTeX is a family of programs designed to produce publication-quality typeset documents. It is particularly strong when working with mathematical symbols. \\
+% 	LaTeX is a family of programs designed to produce publication-quality typeset documents. It is particularly strong when working with mathematical symbols.                                                                                                                                                                                                                                      \\
 % 	The history of LaTeX begins with a program called TEX. In 1978, a computer scientist by the name of Donald Knuth grew frustrated with the mistakes that his publishers made in typesetting his work. He decided to create a typesetting program that everyone could easily use to typeset documents, particularly those that include formulae, and made it freely available. The result is TEX. \\
-% 	Knuth's product is an immensely powerful program, but one that does focus very much on small details. A mathematician and computer scientist by the name of Leslie Lamport wrote a variant of TEX called  that focuses on document structure rather than such details. \\
+% 	Knuth's product is an immensely powerful program, but one that does focus very much on small details. A mathematician and computer scientist by the name of Leslie Lamport wrote a variant of TEX called  that focuses on document structure rather than such details.                                                                                                                          \\
 % 	\\
 % 	\hline
 % \end{tabular}
@@ -178,19 +107,19 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 
 % \begin{itemize}
 % 	\item \bo{Bold} \\
-% 	Gunakan perintah \code{\bslash{}textbf$\lbrace\rbrace$} atau
-% 	\code{\bslash{}bo$\lbrace\rbrace$}.
+% 	      Gunakan perintah \code{\bslash{}textbf$\lbrace\rbrace$} atau
+% 	      \code{\bslash{}bo$\lbrace\rbrace$}.
 % 	\item \f{Italic} \\
-% 	Gunakan perintah \code{\bslash{}textit$\lbrace\rbrace$} atau
-% 	\code{\bslash{}f$\lbrace\rbrace$}.
+% 	      Gunakan perintah \code{\bslash{}textit$\lbrace\rbrace$} atau
+% 	      \code{\bslash{}f$\lbrace\rbrace$}.
 % 	\item \underline{Underline} \\
-% 	Gunakan perintah \code{\bslash{}underline$\lbrace\rbrace$}.
+% 	      Gunakan perintah \code{\bslash{}underline$\lbrace\rbrace$}.
 % 	\item $\overline{Overline}$ \\
-% 	Gunakan perintah \code{\bslash{}overline}.
+% 	      Gunakan perintah \code{\bslash{}overline}.
 % 	\item $^{superscript}$ \\
-% 	Gunakan perintah \code{\bslash{}$\lbrace\rbrace$}.
+% 	      Gunakan perintah \code{\bslash{}$\lbrace\rbrace$}.
 % 	\item $_{subscript}$ \\
-% 	Gunakan perintah \code{\bslash{}\_$\lbrace\rbrace$}.
+% 	      Gunakan perintah \code{\bslash{}\_$\lbrace\rbrace$}.
 % \end{itemize}
 
 % Perintah \code{\bslash{}f} dan \code{\bslash{}bo} hanya dapat digunakan jika package \code{uithesis} digunakan.
@@ -240,15 +169,15 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % 	\label{tab:tab1}
 % 	\begin{tabular}{| l | c r |}
 % 		\hline
-% 		& kol 1 & kol 2 \\
+% 		        & kol 1 & kol 2 \\
 % 		\hline
-% 		baris 1 & 1 & 2 \\
-% 		baris 2 & 3 & 4 \\
-% 		baris 3 & 5 & 6 \\
-% 		baris 4 & 7 & 8 \\
-% 		baris 5 & 9 & 10 \\
+% 		baris 1 & 1     & 2     \\
+% 		baris 2 & 3     & 4     \\
+% 		baris 3 & 5     & 6     \\
+% 		baris 4 & 7     & 8     \\
+% 		baris 5 & 9     & 10    \\
 % 		\hline
-% 		jumlah  & 25 & 30 \\
+% 		jumlah  & 25    & 30    \\
 % 		\hline
 % 	\end{tabular}
 % \end{table}
@@ -256,32 +185,32 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % Adapun untuk membuat tabel panjang yang bisa melebihi dari satu halaman, gunakan perintah \code{\bslash{}begin\{longtable\}} sebagai pengganti \code{\bslash{}begin\{table\}}. Di dalam \code{longtable} tidak perlu lagi ada \code{\bslash{}begin\{tabular\}}. Kemudian, tambahkan tanda \code{\bslash{}\bslash{}} setelah baris \code{\bslash{}label\{....\}}, agar tidak menimbulkan error saat menampilkan \f{caption} di bagian atas tabel. Kemudian, untuk membatasi header yang ingin diulang pada halaman-halaman berikutnya, gunakan perintah \code{\bslash{}endhead}. Contohnya adalah sebagai berikut:
 
 % \begin{longtable}{| l | c r |}
-% \caption{Contoh Tabel Panjang}
-% \label{tab:tab2} \\
-% \hline
-% & kol 1 & kol 2 \\
-% \hline
-% \endfirsthead % batas akhir header yang akan muncul di halaman pertama
-% \hline
-% & kol 1 & kol 2 \\
-% \hline
-% \endhead % batas akhir header yang akan muncul di halaman berikutnya
-% baris 1  & 1 & 2 \\
-% baris 2  & 3 & 4 \\
-% baris 3  & 5 & 6 \\
-% baris 4  & 7 & 8 \\
-% baris 5  & 9 & 10 \\
-% baris 6  & 11 & 12 \\
-% baris 7  & 13 & 14 \\
-% baris 8  & 15 & 16 \\
-% baris 9  & 17 & 18 \\
-% baris 10 & 19 & 20 \\
-% baris 11 & 21 & 22 \\
-% baris 12 & 23 & 24 \\
-% baris 13 & 25 & 26 \\
-% baris 14 & 27 & 28 \\
-% baris 15 & 29 & 30 \\
-% \hline
+% 	\caption{Contoh Tabel Panjang}
+% 	\label{tab:tab2}         \\
+% 	\hline
+% 	         & kol 1 & kol 2 \\
+% 	\hline
+% 	\endfirsthead % batas akhir header yang akan muncul di halaman pertama
+% 	\hline
+% 	         & kol 1 & kol 2 \\
+% 	\hline
+% 	\endhead % batas akhir header yang akan muncul di halaman berikutnya
+% 	baris 1  & 1     & 2     \\
+% 	baris 2  & 3     & 4     \\
+% 	baris 3  & 5     & 6     \\
+% 	baris 4  & 7     & 8     \\
+% 	baris 5  & 9     & 10    \\
+% 	baris 6  & 11    & 12    \\
+% 	baris 7  & 13    & 14    \\
+% 	baris 8  & 15    & 16    \\
+% 	baris 9  & 17    & 18    \\
+% 	baris 10 & 19    & 20    \\
+% 	baris 11 & 21    & 22    \\
+% 	baris 12 & 23    & 24    \\
+% 	baris 13 & 25    & 26    \\
+% 	baris 14 & 27    & 28    \\
+% 	baris 15 & 29    & 30    \\
+% 	\hline
 % \end{longtable}
 
 % Ada jenis tabel lain yang dapat dibuat dengan \latex~berikut beberapa diantaranya.
@@ -293,13 +222,13 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % 	\label{row.spanning}
 % 	\begin{tabular}{|l|l|*{6}{c|}}
 % 		\hline % create horizontal line
-% 		No & Name & \multicolumn{3}{|c|}{Week 1} & \multicolumn{3}{|c|}{Week 2} \\
+% 		No & Name & \multicolumn{3}{|c|}{Week 1} & \multicolumn{3}{|c|}{Week 2}                 \\
 % 		\cline{3-8} % create line from 3rd column till 8th column
-% 		& & A & B & C & A & B & C\\
+% 		   &      & A                            & B                            & C & A & B & C \\
 % 		\hline
-% 		1 & Lala & 1 & 2 & 3 & 4 & 5 & 6\\
-% 		2 & Lili & 1 & 2 & 3 & 4 & 5 & 6\\
-% 		3 & Lulu & 1 & 2 & 3 & 4 & 5 & 6\\
+% 		1  & Lala & 1                            & 2                            & 3 & 4 & 5 & 6 \\
+% 		2  & Lili & 1                            & 2                            & 3 & 4 & 5 & 6 \\
+% 		3  & Lulu & 1                            & 2                            & 3 & 4 & 5 & 6 \\
 % 		\hline
 % 	\end{tabular}
 % \end{table}
@@ -310,15 +239,15 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % 	\label{column.spanning}
 % 	\begin{tabular}{|l|c|l|}
 % 		\hline
-% 		Percobaan & Iterasi & Waktu \\
+% 		Percobaan               & Iterasi & Waktu    \\
 % 		\hline
-% 		Pertama & 1 & 0.1 sec \\ \hline
-% 		\multirow{2}{*}{Kedua} & 1 & 0.1 sec \\
-% 		& 3 & 0.15 sec \\
+% 		Pertama                 & 1       & 0.1 sec  \\ \hline
+% 		\multirow{2}{*}{Kedua}  & 1       & 0.1 sec  \\
+% 		                        & 3       & 0.15 sec \\
 % 		\hline
-% 		\multirow{3}{*}{Ketiga} & 1 & 0.09 sec \\
-% 		& 2 & 0.16 sec \\
-% 		& 3 & 0.21 sec \\
+% 		\multirow{3}{*}{Ketiga} & 1       & 0.09 sec \\
+% 		                        & 2       & 0.16 sec \\
+% 		                        & 3       & 0.21 sec \\
 % 		\hline
 % 	\end{tabular}
 % \end{table}
@@ -329,16 +258,16 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % 	\label{mix.spanning}
 % 	\begin{tabular}{cc|c|c|c|c|}
 % 		\cline{3-6}
-% 		& & \multicolumn{4}{|c|}{Title} \\ \cline{3-6}
-% 		& & A & B & C & D \\ \hline
-% 		\multicolumn{1}{|c|}{\multirow{2}{*}{Type}} &
-% 		\multicolumn{1}{|c|}{X} & 1 & 2 & 3 & 4\\ \cline{2-6}
-% 		\multicolumn{1}{|c|}{}                        &
-% 		\multicolumn{1}{|c|}{Y} & 0.5 & 1.0 & 1.5 & 2.0\\ \cline{1-6}
+% 		                                                &     & \multicolumn{4}{|c|}{Title}                 \\ \cline{3-6}
+% 		                                                &     & A                           & B   & C   & D \\ \hline
+% 		\multicolumn{1}{|c|}{\multirow{2}{*}{Type}}     &
+% 		\multicolumn{1}{|c|}{X}                         & 1   & 2                           & 3   & 4       \\ \cline{2-6}
+% 		\multicolumn{1}{|c|}{}                          &
+% 		\multicolumn{1}{|c|}{Y}                         & 0.5 & 1.0                         & 1.5 & 2.0     \\ \cline{1-6}
 % 		\multicolumn{1}{|c|}{\multirow{2}{*}{Resource}} &
-% 		\multicolumn{1}{|c|}{I} & 10 & 20 & 30 & 40\\ \cline{2-6}
-% 		\multicolumn{1}{|c|}{}                        &
-% 		\multicolumn{1}{|c|}{J} & 5 & 10 & 15 & 20\\ \cline{1-6}
+% 		\multicolumn{1}{|c|}{I}                         & 10  & 20                          & 30  & 40      \\ \cline{2-6}
+% 		\multicolumn{1}{|c|}{}                          &
+% 		\multicolumn{1}{|c|}{J}                         & 5   & 10                          & 15  & 20      \\ \cline{1-6}
 % 	\end{tabular}
 % \end{table}
 
@@ -347,7 +276,7 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % \section{Keterkaitan Teori Dengan Penelitian}
 % \label{sec:keterkaitan}
 % %-----------------------------------------------------------------------------%
-% \TODO{Ada baiknya setelah menjelaskan teori-teori, Anda menjelaskan apa kaitan teori tersebut dengan penelitian Anda. Hal ini tentunya membantu pembaca dalam memahami bahwa teori yang Anda paparkan memang penting untuk memahami penelitian Anda nantinya.}
+% \todo{Ada baiknya setelah menjelaskan teori-teori, Anda menjelaskan apa kaitan teori tersebut dengan penelitian Anda. Hal ini tentunya membantu pembaca dalam memahami bahwa teori yang Anda paparkan memang penting untuk memahami penelitian Anda nantinya.}
 
 % \begin{figure}
 % 	\centering
@@ -356,4 +285,4 @@ pada \apdx~\ref{code:appendix:parametricCubic}.
 % 	\label{fig:research_concept_map}
 % \end{figure}
 
-% \TODO{Jelaskan \pic~\ref{fig:research_concept_map} di sini. Setiap gambar pada tugas akhir butuh penjelasan. Gambar hadir untuk mempermudah membaca memahami konteks, tetapi tidak bisa berdiri sendiri tanpa penjelasan. Terkait gambar, Anda juga bisa mengatur skalanya. Gambar kali ini lebarnya 0,8x dari lebar teks halaman.}
+% \todo{Jelaskan \pic~\ref{fig:research_concept_map} di sini. Setiap gambar pada tugas akhir butuh penjelasan. Gambar hadir untuk mempermudah membaca memahami konteks, tetapi tidak bisa berdiri sendiri tanpa penjelasan. Terkait gambar, Anda juga bisa mengatur skalanya. Gambar kali ini lebarnya 0,8x dari lebar teks halaman.}
